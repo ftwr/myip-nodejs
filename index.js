@@ -1,25 +1,15 @@
-var https = require('https');
+const https = require('https')
+const host = 'https://api.ipify.org' 
 
-var callback = function(err, ip){
-    if(err){
-        return console.log(err);
-    }
-    console.log('Our public IP is', ip);
-    // do something here with the IP address
-};
-
-https.get({
-    host: 'api.ipify.org',
-}, function(response) {
-    var ip = '';
-    response.on('data', function(d) {
-        ip += d;
-    });
-    response.on('end', function() {
-        if(ip){
-            callback(null, ip);
-        } else {
-            callback('could not get public ip address :(');
-        }
-    });
-});
+exports.handler = (event, context, callback) => {
+    context.callbackWaitsForEmptyEventLoop = false
+    https.get(host, res => {
+        res.setEncoding("utf8")
+        res.on('data', (data) => {
+            callback(null, data)
+        })
+    })
+    .on('error', (e) => {
+        callback(e)
+    })
+}
